@@ -1,0 +1,449 @@
+/* ============================================================
+   RAILMITRA DESIGN SYSTEM
+   SWISS TYPOGRAPHY + APPLE-STYLE MINIMAL PRODUCT DESIGN
+   STRICT PALETTE: BLACK (#000000), WHITE (#FFFFFF), BLUE (#2563EB)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   DESIGN TOKENS & CSS VARIABLES
+   ============================================================ */
+:root {
+  /* Strict 3-Color System: Black, White, Blue Accent */
+  --color-black: #000000;
+  --color-white: #ffffff;
+  --color-blue: #2563eb;
+  --color-blue-hover: #1d4ed8;
+  --color-blue-focus: rgba(37, 99, 235, 0.25);
+
+  /* Light Theme Surfaces (Strict Swiss Palette) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-tertiary: #f5f5f7;
+  --bg-card: #f5f5f7;
+  
+  --border-subtle: #e5e5e7;
+  --border-medium: #cbd5e1;
+  --border-dark: #000000;
+
+  --text-primary: #000000;
+  --text-secondary: #6b7280;
+  --text-muted: #94a3b8;
+
+  /* Shadows (Neutral, no blue glows) */
+  --shadow-subtle: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-floating: 0 12px 36px rgba(0, 0, 0, 0.08);
+
+  /* Radius Scale */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ============================================================
+   DARK MODE TOKENS (Strict Swiss Palette)
+   ============================================================ */
+.dark {
+  color-scheme: dark;
+  --bg-primary: #05080f;
+  --bg-secondary: #0a0f1c;
+  --bg-tertiary: #0a0f1c;
+  --bg-card: #0a0f1c;
+  
+  --border-subtle: #1a1f2e;
+  --border-medium: #2a3142;
+  --border-dark: #ffffff;
+
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.6);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.7);
+  --shadow-floating: 0 16px 48px rgba(0, 0, 0, 0.9);
+}
+
+/* ============================================================
+   GLOBAL BASE STYLES
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  selection-background-color: var(--color-blue);
+  selection-color: #ffffff;
+}
+
+/* Heading Hierarchy - Swiss Typography */
+h1 {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+h2 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+h3, h4, h5, h6 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ============================================================
+   ANIMATIONS (Subtle, 150-300ms, Apple-Style)
+   ============================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in    { animation: fadeIn var(--transition-base) both; }
+.animate-fade-in-up { animation: fadeInUp var(--transition-smooth) both; }
+.animate-scale-in   { animation: scaleIn var(--transition-base) both; }
+
+/* ============================================================
+   BUTTON SYSTEM (Primary Blue, Secondary White, Dark Black)
+   ============================================================ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--color-blue);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  box-shadow: var(--shadow-subtle);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-blue-hover);
+  box-shadow: var(--shadow-card);
+  transform: translateY(-0.5px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  box-shadow: var(--shadow-subtle);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--border-medium);
+  background-color: var(--bg-secondary);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+.btn-black {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: #000000;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  box-shadow: var(--shadow-subtle);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.btn-black:hover:not(:disabled) {
+  background-color: #18181b;
+}
+
+.btn-black:active:not(:disabled) {
+  transform: scale(0.99);
+}
+
+/* ============================================================
+   INPUT SYSTEM
+   ============================================================ */
+.input-base {
+  width: 100%;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+.input-base::placeholder {
+  color: var(--text-muted);
+}
+
+.input-base:focus {
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px var(--color-blue-focus);
+}
+
+.input-base:disabled {
+  background-color: var(--bg-secondary);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   CARD UTILITIES (Clean Swiss Cards)
+   ============================================================ */
+.card-swiss {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-subtle);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.card-swiss:hover {
+  border-color: var(--border-medium);
+}
+
+.card-swiss-dark {
+  background-color: #0a0f1c;
+  border: 1px solid #1a1f2e;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ============================================================
+   BADGES (Pure Monochrome & Blue Accent)
+   ============================================================ */
+.badge-blue {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--bg-card);
+  color: var(--color-blue);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.badge-neutral {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #000000;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.badge-black {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  border-radius: var(--radius-full);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ============================================================
+   OTP INPUT
+   ============================================================ */
+.otp-display {
+  font-family: var(--font-mono);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-align: center;
+  color: #000000;
+}
+
+/* ============================================================
+   CUSTOM SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ============================================================
+   ONECOOLIE (OC) SWISS GREY SYSTEM
+   Strict Neutral Grey Scale with Dark Mode Support
+   ============================================================ */
+:root {
+  --oc-bg-main: #ffffff;
+  --oc-bg-alt: #f5f6f8;
+  --oc-surface: #ffffff;
+  --oc-surface-alt: #f5f6f8;
+  --oc-card: #ffffff;
+  --oc-card-alt: #f5f6f8;
+  --oc-border: #e4e4e7; /* zinc-200 */
+  --oc-border-subtle: #f4f4f5; /* zinc-100 */
+  --oc-text-primary: #09090b; /* zinc-950 */
+  --oc-text-secondary: #52525b; /* zinc-600 */
+  --oc-text-muted: #71717a; /* zinc-500 */
+  --oc-text-subtle: #a1a1aa; /* zinc-400 */
+  --oc-accent: #2563eb;
+  --oc-accent-hover: #1d4ed8;
+}
+
+.dark {
+  --oc-bg-main: #05080f;
+  --oc-bg-alt: #0a0f1c;
+  --oc-surface: #0a0f1c;
+  --oc-surface-alt: #0d1420;
+  --oc-card: #0a0f1c;
+  --oc-card-alt: #0d1420;
+  --oc-border: #1f2734;
+  --oc-border-subtle: #141c28;
+  --oc-text-primary: #ffffff;
+  --oc-text-secondary: #94a3b8;
+  --oc-text-muted: #64748b;
+  --oc-text-subtle: #475569;
+  --oc-accent: #2563eb;
+  --oc-accent-hover: #3b82f6;
+}
+
+.oc-section {
+  background-color: var(--oc-bg-main);
+  color: var(--oc-text-primary);
+}
+
+.oc-section-alt {
+  background-color: var(--oc-bg-alt);
+  color: var(--oc-text-primary);
+}
+
+.oc-card {
+  background-color: var(--oc-card);
+  border: 1px solid var(--oc-border);
+  color: var(--oc-text-primary);
+}
+
+.oc-card-alt {
+  background-color: var(--oc-card-alt);
+  border: 1px solid var(--oc-border);
+  color: var(--oc-text-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
