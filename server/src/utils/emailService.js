@@ -1,4 +1,10 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+// Force IPv4 DNS resolution across runtime to prevent ENETUNREACH on platforms without IPv6 routing
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -85,6 +91,7 @@ const createTransport = (port, secure) => {
     host: 'smtp.gmail.com',
     port,
     secure,
+    family: 4, // CRITICAL: Force IPv4 to prevent ENETUNREACH on cloud environments (like Render) that lack IPv6 routing
     auth: {
       user: FROM_EMAIL,
       pass: process.env.GMAIL_APP_PASSWORD,
@@ -95,7 +102,86 @@ const createTransport = (port, secure) => {
   });
 };
 
+// Brevo HTTP API (Port 443 — bypasses cloud SMTP port blocks entirely)
+const sendViaBrevo = async (to, otp, expiryMinutes) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return null;
+
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'api-key': apiKey,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: {
+        name: FROM_NAME,
+        email: process.env.BREVO_SENDER_EMAIL || FROM_EMAIL || 'onecoolie.noreply@gmail.com',
+      },
+      to: [{ email: to }],
+      subject: `${otp} — Your OneCoolie verification code`,
+      htmlContent: buildOtpHtml(otp, expiryMinutes),
+      textContent: `Your OneCoolie OTP: ${otp}\n\nExpires in ${expiryMinutes} minutes. Never share this code.`,
+    }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(`Brevo HTTP API Error: ${data.message || JSON.stringify(data)}`);
+  }
+  console.log('OTP EMAIL SENT (Brevo HTTP API):', { messageId: data.messageId, to });
+  return data;
+};
+
+// Resend HTTP API (Port 443 — bypasses cloud SMTP port blocks entirely)
+const sendViaResend = async (to, otp, expiryMinutes) => {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return null;
+
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.RESEND_FROM || `${FROM_NAME} <onboarding@resend.dev>`,
+      to: [to],
+      subject: `${otp} — Your OneCoolie verification code`,
+      html: buildOtpHtml(otp, expiryMinutes),
+      text: `Your OneCoolie OTP: ${otp}\n\nExpires in ${expiryMinutes} minutes. Never share this code.`,
+    }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(`Resend HTTP API Error: ${data.message || JSON.stringify(data)}`);
+  }
+  console.log('OTP EMAIL SENT (Resend HTTP API):', { messageId: data.id, to });
+  return data;
+};
+
 const sendOtpEmail = async (to, otp, expiryMinutes = 10) => {
+  // 1. If Brevo API key is configured, use HTTP API over Port 443 (100% unblocked on cloud hosts)
+  if (process.env.BREVO_API_KEY) {
+    try {
+      return await sendViaBrevo(to, otp, expiryMinutes);
+    } catch (brevoErr) {
+      console.error('BREVO HTTP API FAILED:', brevoErr.message);
+    }
+  }
+
+  // 2. If Resend API key is configured, use HTTP API over Port 443
+  if (process.env.RESEND_API_KEY) {
+    try {
+      return await sendViaResend(to, otp, expiryMinutes);
+    } catch (resendErr) {
+      console.error('RESEND HTTP API FAILED:', resendErr.message);
+    }
+  }
+
+  // 3. Gmail SMTP with forced IPv4 (family: 4)
   const mailPayload = {
     from:    `"${FROM_NAME}" <${FROM_EMAIL}>`,
     to,
