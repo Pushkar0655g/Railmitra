@@ -237,7 +237,7 @@ export default function AuthPage({ role = 'passenger' }) {
         setError(msg || 'An account with this email already exists.');
         setLoginEmail(email);
       } else {
-        setError(msg || 'Unable to send verification code. Please try again.');
+        setError(err?.response?.data?.message || 'Unable to send verification code. Please try again.');
       }
     } finally {
       setLoading(false);

@@ -107,14 +107,23 @@ const sendOtpEmail = async (to, otp, expiryMinutes = 10) => {
   try {
     const transport465 = createTransport(465, true);
     const info = await transport465.sendMail(mailPayload);
-    console.log('OTP EMAIL SENT:', { messageId: info.messageId, to });
+    console.log('OTP EMAIL SENT (port 465):', { messageId: info.messageId, to });
     return info;
   } catch (e) {
-    console.error('SMTP 465 FAILED:', e.message);
-    const transport587 = createTransport(587, false);
-    const info = await transport587.sendMail(mailPayload);
-    console.log('OTP EMAIL SENT:', { messageId: info.messageId, to });
-    return info;
+    console.error('SMTP PRIMARY FAILED:', e.message);
+    console.error('SMTP FULL ERROR:', JSON.stringify(e, Object.getOwnPropertyNames(e)));
+    try {
+      const transport587 = createTransport(587, false);
+      const info = await transport587.sendMail(mailPayload);
+      console.log('OTP EMAIL SENT (port 587):', { messageId: info.messageId, to });
+      return info;
+    } catch (fallbackErr) {
+      console.error('SMTP FALLBACK FAILED:', fallbackErr.message);
+      console.error('SMTP FALLBACK FULL ERROR:', JSON.stringify(fallbackErr, Object.getOwnPropertyNames(fallbackErr)));
+      const combinedError = new Error(`SMTP Error: [Port 465: ${e.message}] [Port 587: ${fallbackErr.message}]`);
+      combinedError.code = fallbackErr.code || e.code;
+      throw combinedError;
+    }
   }
 };
 

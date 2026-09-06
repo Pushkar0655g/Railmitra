@@ -148,8 +148,9 @@ exports.sendOtp = async (req, res) => {
 
   } catch (err) {
     console.error('SEND OTP — SERVER ERROR:', err.message);
+    const isSmtpError = err.message && (err.message.includes('SMTP') || err.message.includes('Invalid login') || err.message.includes('Timeout'));
     return res.status(500).json({
-      message: 'Failed to send OTP. Please check your email and try again.'
+      message: isSmtpError ? `Email service blocked by provider: ${err.message}` : 'Failed to send OTP. Please check your email and try again.'
     });
   }
 };
