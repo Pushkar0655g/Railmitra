@@ -24,11 +24,13 @@ const server = http.createServer(app);
 // --------------------------------------------------
 // CORS Logic
 // --------------------------------------------------
+const cleanUrl = (u) => String(u || '').trim().replace(/\/+$/, '');
 const isOriginAllowed = (origin) => {
-  if (!origin) return true; // server-to-server or curl
+  if (!origin) return true;
   if (process.env.NODE_ENV !== 'production') return true;
-  if (origin === process.env.CLIENT_URL) return true;
-  return false;
+  const allowed = String(process.env.CLIENT_URL || '')
+    .split(',').map(cleanUrl).filter(Boolean);
+  return allowed.includes(cleanUrl(origin));
 };
 
 // --------------------------------------------------
@@ -162,4 +164,5 @@ const PORT = process.env.PORT || 5000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`OneCoolie API running on port ${PORT}`);
   console.log(`http://localhost:${PORT}`);
+  console.log('CORS allowed origins:', process.env.CLIENT_URL);
 });
