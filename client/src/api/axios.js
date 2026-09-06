@@ -7,6 +7,7 @@ const API_URL = envUrl.includes('localhost') && typeof window !== 'undefined' &&
 
 const instance = axios.create({
   baseURL: API_URL,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },

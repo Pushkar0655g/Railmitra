@@ -80,25 +80,42 @@ const buildOtpHtml = (otp, expiryMinutes = 10) => `
 </body>
 </html>`;
 
-const sendOtpEmail = async (to, otp, expiryMinutes = 10) => {
-  // Create fresh transport per email — avoids stale connection errors
-  const transport = nodemailer.createTransport({
-    service: 'gmail',
+const createTransport = (port, secure) => {
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port,
+    secure,
     auth: {
       user: FROM_EMAIL,
       pass: process.env.GMAIL_APP_PASSWORD,
     },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
+};
 
-  const info = await transport.sendMail({
+const sendOtpEmail = async (to, otp, expiryMinutes = 10) => {
+  const mailPayload = {
     from:    `"${FROM_NAME}" <${FROM_EMAIL}>`,
     to,
     subject: `${otp} — Your OneCoolie verification code`,
     html:    buildOtpHtml(otp, expiryMinutes),
     text:    `Your OneCoolie OTP: ${otp}\n\nExpires in ${expiryMinutes} minutes. Never share this code.`,
-  });
+  };
 
-  console.log('OTP EMAIL SENT:', { messageId: info.messageId, to });
+  try {
+    const transport465 = createTransport(465, true);
+    const info = await transport465.sendMail(mailPayload);
+    console.log('OTP EMAIL SENT:', { messageId: info.messageId, to });
+    return info;
+  } catch (e) {
+    console.error('SMTP 465 FAILED:', e.message);
+    const transport587 = createTransport(587, false);
+    const info = await transport587.sendMail(mailPayload);
+    console.log('OTP EMAIL SENT:', { messageId: info.messageId, to });
+    return info;
+  }
 };
 
 module.exports = { sendOtpEmail };
