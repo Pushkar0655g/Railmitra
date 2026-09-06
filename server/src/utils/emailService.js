@@ -102,9 +102,11 @@ const createTransport = (port, secure) => {
   });
 };
 
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+
 // Brevo HTTP API (Port 443 — bypasses cloud SMTP port blocks entirely)
 const sendViaBrevo = async (to, otp, expiryMinutes) => {
-  const apiKey = process.env.BREVO_API_KEY;
+  const apiKey = BREVO_API_KEY;
   if (!apiKey) return null;
 
   const res = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -163,12 +165,13 @@ const sendViaResend = async (to, otp, expiryMinutes) => {
 };
 
 const sendOtpEmail = async (to, otp, expiryMinutes = 10) => {
-  // 1. If Brevo API key is configured, use HTTP API over Port 443 (100% unblocked on cloud hosts)
-  if (process.env.BREVO_API_KEY) {
+  // 1. Primary: Brevo HTTP API over Port 443 (100% unblocked on cloud hosts like Render)
+  if (BREVO_API_KEY) {
     try {
       return await sendViaBrevo(to, otp, expiryMinutes);
     } catch (brevoErr) {
       console.error('BREVO HTTP API FAILED:', brevoErr.message);
+      throw brevoErr;
     }
   }
 
