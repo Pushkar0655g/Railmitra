@@ -117,7 +117,7 @@ const sendViaBrevo = async (to, otp, expiryMinutes) => {
     body: JSON.stringify({
       sender: {
         name: FROM_NAME,
-        email: process.env.BREVO_SENDER_EMAIL || FROM_EMAIL || 'onecoolie.noreply@gmail.com',
+        email: process.env.BREVO_SENDER_EMAIL || '2303A52362@sru.edu.in',
       },
       to: [{ email: to }],
       subject: `${otp} — Your OneCoolie verification code`,
